@@ -1,0 +1,109 @@
+const util = require('util')
+const request = require('request')
+const network = require('./network')
+
+class Board {
+	constructor(name, database) {
+		this.name = name;
+		this.database = database;
+	}
+	
+	getAllThreadsLink() {
+		return util.format("https://a.4cdn.org/%s/threads.json", this.name)
+	}
+	
+	getThreadLink(threadID) {
+		return util.format("https://a.4cdn.org/%s/thread/%s.json", this.name, threadID)
+	}
+	
+	setLastModified(date) {
+		this.lastModified = date
+	}
+	
+	getLastModified() {
+		return this.lastModified
+	}
+	
+	requestAllThreads() {
+		let opt = {
+			url: this.getAllThreadsLink(),
+			localAddress: network.getNextAddress(),
+			headers: {
+				
+			}
+		}
+		
+		if(this.getLastModified())
+			opt.headers['If-Modified-Since'] = this.getLastModified()
+		
+		return new Promise((resolve, reject) => {
+			request.get(opt, (error, response, body) => {
+				if(error) {
+					reject(error)
+				} else {
+					resolve([response, body])
+				}
+			})
+		}).then(([response, body]) => {
+			if(response.headers['last-modified'])
+				this.setLastModified(response.headers['last-modified'])
+			
+			if(response.statusCode == 200) {
+				return JSON.parse(response.body)
+			} else if(response.statusCode == 304) {
+				return []
+			} else {
+				throw new Error("HTTP Request failed. Status code " + response.statusCode)
+			}
+		}).then((obj) => {
+			let list = []
+			obj.forEach((threadList) => {
+				threadList['threads'].forEach((thread) => {
+					thread.page = threadList.page
+					list.push(thread)
+				})
+			})
+			return list
+		}).catch((err) => {
+			console.log(err)
+		})
+	}
+
+	requestThread(threadID) {
+		let opt = {
+			url: this.getThreadLink(threadID),
+			localAddress: network.getNextAddress(),
+			headers: {
+
+			}
+		}
+
+		return new Promise((resolve, reject) => {
+			request.get(opt, (error, response, body) => {
+				if(error) {
+					reject(error)
+				} else {
+					resolve([response, body])
+				}
+			})
+		}).then(([response, body]) => {
+			if(response.headers['last-modified'])
+				this.setLastModified(response.headers['last-modified'])
+			
+			if(response.statusCode == 200) {
+				return JSON.parse(response.body)
+			} else if(response.statusCode == 304) {
+				return []
+			} else {
+				throw new Error("HTTP Request failed. Status code " + response.statusCode)
+			}
+		}).then((obj) => {
+			let list = []
+
+		}).catch((err) => {
+			console.log(err)
+		})
+	}
+}
+
+module.exports = Board;
