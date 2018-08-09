@@ -1,9 +1,8 @@
 const HashMap = require('hashmap')
 
 class BoardWatcher {
-	constructor(arr, db) {
+	constructor(arr) {
 		this.boards = arr
-		this.db = db
 	}
 	
 	poll() {
@@ -48,8 +47,14 @@ class BoardWatcher {
 
 		threadMap.forEach((val) => {
 			// New Thread
-			board.requestThread(val).then((obj) => {
+			board.requestThread(val).then((threadRequest) => {
+				if(threadRequest.statusCode == 404) {
+					//We missed it?
+					continue
+				}
 
+				val.posts = threadRequest.posts
+				board.insertThread(val)
 			})
 			
 		})
