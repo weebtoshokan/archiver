@@ -27,7 +27,7 @@ class Database {
     }
 
     setupBoard(board) {
-        if(!boardQueries.has(board)) {
+        if(!this.boardQueries.has(board)) {
             let queryObject = {}
 
             queryObject.insert = util.format(

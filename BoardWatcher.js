@@ -50,7 +50,7 @@ class BoardWatcher {
 			board.requestThread(val).then((threadRequest) => {
 				if(threadRequest.statusCode == 404) {
 					//We missed it?
-					continue
+					return
 				}
 
 				val.posts = threadRequest.posts
