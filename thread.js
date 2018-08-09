@@ -22,6 +22,18 @@ class Thread {
 	setPage(page) {
 		this.page = page
 	}
+
+	setLastMod(mod) {
+		this.lastMod = mod
+	}
+
+	getLastMod() {
+		return this.lastMod
+	}
+
+	getNum() {
+		return this.no
+	}
 }
 
 module.exports = Thread
