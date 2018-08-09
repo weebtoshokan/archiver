@@ -77,14 +77,17 @@ class Board {
 		})
 	}
 
-	requestThread(threadID) {
+	requestThread(thread) {
 		let opt = {
-			url: this.getThreadLink(threadID),
+			url: this.getThreadLink(thread.getNum()),
 			localAddress: network.getNextAddress(),
 			headers: {
 
 			}
 		}
+
+		if(thread.getLastMod())
+			opt.headers['If-Modified-Since'] = this.getLastMod()
 
 		return new Promise((resolve, reject) => {
 			request.get(opt, (error, response, body) => {
@@ -96,7 +99,7 @@ class Board {
 			})
 		}).then(([response, body]) => {
 			if(response.headers['last-modified'])
-				this.setLastModified(response.headers['last-modified'])
+				thread.setLastMod(response.headers['last-modified'])
 			
 			if(response.statusCode == 200) {
 				return JSON.parse(response.body)
