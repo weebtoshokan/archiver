@@ -8,6 +8,7 @@ class Board {
 	constructor(name, database) {
 		this.name = name;
 		this.database = database;
+		database.setupBoard(name)
 		this.threads = new HashMap();
 	}
 	
@@ -117,7 +118,13 @@ class Board {
 	}
 
 	insertThread(thread) {
-		
+		if(!this.threads.has(thread.no)) {
+			this.threads.set(thread.no, thread)
+		} else {
+			throw new Error(util.format("Duplicate thread %s in board %s", thread.no, this.name))
+		}
+
+		this.database.insertThread(board, thread)
 	}
 }
 
