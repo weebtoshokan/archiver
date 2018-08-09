@@ -108,9 +108,6 @@ class Board {
 			} else {
 				throw new Error("HTTP Request failed. Status code " + response.statusCode)
 			}
-		}).then((obj) => {
-			let list = []
-
 		}).catch((err) => {
 			console.log(err)
 		})

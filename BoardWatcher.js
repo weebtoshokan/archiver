@@ -39,12 +39,18 @@ class BoardWatcher {
 			
 			if(!exists) {
 				// Thread was deleted
+				let forced = val.getPage() < 10;
+
 				threadMap.remove(val.no)
 			}
 		})
 
 		threadMap.forEach((val) => {
-			// New threads
+			// New Thread
+			board.requestThread(val).then((obj) => {
+
+			})
+			
 		})
 	}
 	
