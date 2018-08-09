@@ -1,11 +1,14 @@
 const util = require('util')
 const request = require('request')
 const network = require('./network')
+const HashMap = require('hashmap')
+const Thread = require('./thread')
 
 class Board {
 	constructor(name, database) {
 		this.name = name;
 		this.database = database;
+		this.threads = new HashMap();
 	}
 	
 	getAllThreadsLink() {
@@ -22,6 +25,10 @@ class Board {
 	
 	getLastModified() {
 		return this.lastModified
+	}
+
+	getThreads() {
+		return this.threads
 	}
 	
 	requestAllThreads() {
@@ -60,6 +67,7 @@ class Board {
 			obj.forEach((threadList) => {
 				threadList['threads'].forEach((thread) => {
 					thread.page = threadList.page
+					Object.setPrototypeOf(thread, Thread.prototype)
 					list.push(thread)
 				})
 			})

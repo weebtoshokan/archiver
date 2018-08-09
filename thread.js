@@ -23,3 +23,5 @@ class Thread {
 		this.page = page
 	}
 }
+
+module.exports = Thread
