@@ -101,16 +101,23 @@ class Board {
 			if(response.headers['last-modified'])
 				thread.setLastMod(response.headers['last-modified'])
 			
+			let responseObject = {
+				code: response.statusCode
+			}
 			if(response.statusCode == 200) {
-				return JSON.parse(response.body)
-			} else if(response.statusCode == 304) {
-				return []
-			} else {
+				let threadObject = JSON.parse(response.body)
+				responseObject.posts = threadObject.posts
+			} else if( !(response.statusCode == 304 || response.statusCode == 404) ) {
 				throw new Error("HTTP Request failed. Status code " + response.statusCode)
 			}
+			return responseObject;
 		}).catch((err) => {
 			console.log(err)
 		})
+	}
+
+	insertThread(thread) {
+		
 	}
 }
 
