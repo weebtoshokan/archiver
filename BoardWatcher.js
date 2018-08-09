@@ -1,8 +1,9 @@
 const HashMap = require('hashmap')
 
 class BoardWatcher {
-	constructor(arr) {
+	constructor(arr, db) {
 		this.boards = arr
+		this.db = db
 	}
 	
 	poll() {
