@@ -24,7 +24,7 @@ class Database {
             port: this.port,
             database: this.database,
             waitForConnections: true,
-            connectionLimit: 10,
+            connectionLimit: 1,
             queueLimit: 0
         })
     }
@@ -40,8 +40,6 @@ class Database {
                 'WHERE NOT EXISTS (SELECT 1 FROM `%s` WHERE num = ? AND subnum = ?) AND NOT EXISTS (SELECT 1 FROM `%s` WHERE num = ? AND subnum = ?)',
                 board, board, board + '_deleted')
           
-
-            console.log(queryObject.insert)
 
             this.boardQueries.set(board, queryObject)
         } else {
@@ -62,14 +60,14 @@ class Database {
         return entities.decode(str).trim()
     }
 
-    formatPostQuery(post, index) {
+    formatPostQuery(post) {
         let p = []
         
         let ext = post.ext || ''
 
         let capcode = 'N'
         if(post.capcode && post.capcode.length >= 1) {
-            capcode = post.substring(0, 1).toUpperCase()
+            capcode = post.capcode.substring(0, 1).toUpperCase()
         }
 
         let posterHash = post.id || ''
@@ -129,6 +127,7 @@ class Database {
 
         this.pool.getConnection().then((conn) => {
             let queries = []
+            
             thread.posts.forEach((post, i) => {
                 let q = conn.execute(queryObject.insert, this.formatPostQuery(post, i))
                 queries.push(q)
@@ -147,7 +146,6 @@ class Database {
             })
             .catch((err) => {
                 console.log(err)
-                conn.rollback()
                 conn.release()
             })
         }).catch((err) => {
