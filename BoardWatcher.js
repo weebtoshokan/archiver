@@ -34,15 +34,14 @@ class BoardWatcher {
 			let exists = threadMap.has(val.no)
 			if(exists && threadMap.get(val.no).last_modified !== val.last_modified) {
 				// Thread updated
-				threadMap.remove(val.no)
 			}
 			
 			if(!exists) {
 				// Thread was deleted
 				let forced = val.getPage() < 10;
-
-				threadMap.remove(val.no)
 			}
+
+			threadMap.remove(val.no)
 		})
 
 		threadMap.forEach((val) => {
