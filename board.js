@@ -124,7 +124,7 @@ class Board {
 			throw new Error(util.format("Duplicate thread %s in board %s", thread.no, this.name))
 		}
 
-		this.database.insertThread(board, thread)
+		this.database.insertThread(this.name, thread)
 	}
 }
 
