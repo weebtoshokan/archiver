@@ -72,6 +72,14 @@ class Database {
             capcode = post.substring(0, 1).toUpperCase()
         }
 
+        let posterHash = post.id || ''
+        if(posterHash == "Developer") 
+            posterHash = "Dev";
+
+        let posterCountry = post.country || ''
+        if(posterCountry === "XX" || posterCountry === "A1") 
+            posterCountry = '';
+
         p.push('')
         p.push(post.no)
         p.push(0)
@@ -94,9 +102,17 @@ class Database {
         p.push(this.cleanInput(post.name || ''))
         p.push(post.trip || '')
         p.push(this.cleanInput(post.sub || ''))
-        p.push()
-        p.push()
-
+        p.push(this.cleanComment(post.com || ''))
+        p.push('')
+        p.push(post.sticky || 0)
+        p.push(post.locked || 0)
+        p.push(posterHash)
+        p.push(posterCountry)
+        p.push('')
+        p.push(post.no)
+        p.push(0)
+        p.push(post.no)
+        p.push(0)
 
         return p
     }
@@ -109,13 +125,6 @@ class Database {
     }
 
     insertThread(board, thread) {
-        thread.posts.forEach((post) => {
-            console.log(this.cleanComment(post.com || ''))
-        })
-
-        if(true)
-            return
-
         let queryObject = this.getBoard(board)
 
         this.pool.getConnection().then((conn) => {
