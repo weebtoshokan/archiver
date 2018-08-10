@@ -1,5 +1,8 @@
-const mysql = require('mysql2')
+const mysql = require('mysql2/promise')
 const HashMap = require('hashmap')
+const util = require('util')
+const Entities = require('html-entities').AllHtmlEntities;
+
 
 
 class Database {
@@ -17,6 +20,7 @@ class Database {
         this.pool = mysql.createPool({
             host: this.host,
             user: this.user,
+            password: this.password,
             port: this.port,
             database: this.database,
             waitForConnections: true,
@@ -29,12 +33,15 @@ class Database {
         if(!this.boardQueries.has(board)) {
             let queryObject = {}
 
-            queryObject.insert = mysql.format(
-                'INSERT INTO ?? (poster_ip, num, subnum, thread_num, op, timestamp, preview_orig, preview_w, preview_h, media_filename, ' +
+            queryObject.insert = util.format(
+                'INSERT INTO `%s` (poster_ip, num, subnum, thread_num, op, timestamp, preview_orig, preview_w, preview_h, media_filename, ' +
                 'media_w, media_h, media_size, media_hash, media_orig, spoiler, deleted, capcode, email, name, trip, title, comment, delpass, ' +
                 'sticky, locked, poster_hash, poster_country, exif) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? FROM DUAL ' +
-                'WHERE NOT EXISTS (SELECT 1 FROM ?? WHERE num = ? AND subnum = ?) AND NOT EXISTS (SELECT 1 FROM ?? WHERE num = ? AND subnum = ?)',
-            [board, board, board + "_deleted"])
+                'WHERE NOT EXISTS (SELECT 1 FROM `%s` WHERE num = ? AND subnum = ?) AND NOT EXISTS (SELECT 1 FROM `%s` WHERE num = ? AND subnum = ?)',
+                board, board, board + '_deleted')
+          
+
+            console.log(queryObject.insert)
 
             this.boardQueries.set(board, queryObject)
         } else {
@@ -46,29 +53,78 @@ class Database {
         if(!this.boardQueries.has(board))
             throw new Error('Board queries were not initialized!')
 
-        return this.board.get(board)
+        return this.boardQueries.get(board)
     }
 
-    formatPostQuery() {
-        return []
+    cleanInput(str) {
+        const entities = new Entities()
+
+        return entities.decode(str).trim()
+    }
+
+    formatPostQuery(post, index) {
+        let p = []
+        
+        let ext = post.ext || ''
+
+        let capcode = 'N'
+        if(post.capcode && post.capcode.length >= 1) {
+            capcode = post.substring(0, 1).toUpperCase()
+        }
+
+        p.push('')
+        p.push(post.no)
+        p.push(0)
+        p.push(post.resto == 0 ? post.no : post.resto)
+        p.push(post.resto == 0)
+        p.push(post.time) //asagi appears to be subtracting 4 hours from the timestamp, investigate
+        p.push(post.tim ? post.tim + 's.jpg' : '')
+        p.push(post.tn_w || 0)
+        p.push(post.tn_h || 0)
+        p.push(post.filename ? post.filename + ext : '')
+        p.push(post.w || 0)
+        p.push(post.h || 0)
+        p.push(post.fsize || 0)
+        p.push(post.md5 || '')
+        p.push(post.tim ? post.tim + ext : '')
+        p.push(post.spoiler || 0)
+        p.push(false)
+        p.push(capcode)
+        p.push('')
+        p.push(this.cleanInput(post.name || ''))
+        p.push(post.trip || '')
+        p.push(this.cleanInput(post.sub || ''))
+        p.push()
+        p.push()
+
+
+        return p
+    }
+
+    cleanComment(str) {
+        str = str.replace(/<br>/g, "\n")
+        str = str.replace(/<a[^>]*>(.*?)<\/a>/g, "$1")
+        str = str.replace(/<span class=\"quote\">(.*?)<\/span>/g, "$1")
+        return this.cleanInput(str)
     }
 
     insertThread(board, thread) {
+        thread.posts.forEach((post) => {
+            console.log(this.cleanComment(post.com || ''))
+        })
+
+        if(true)
+            return
+
         let queryObject = this.getBoard(board)
 
         this.pool.getConnection().then((conn) => {
-            conn.prepare(queryObject.insert).then((err, stmt) => {
-                if(err)
-                    throw new Error('Statement preparation failure.')
-
+            conn.prepare(queryObject.insert).then((stmt) => {
                 conn.beginTransaction()
-                .then((err) => {
-                    if(err)
-                        throw new Error('Transaction initialization failure.')
-                    
+                .then((transaction) => {                    
                     let queries = []
-                    thread.posts.forEach((post) => {
-                        let q = stmt.execute(this.formatPostQuery(post))
+                    thread.posts.forEach((post, i) => {
+                        let q = stmt.execute(this.formatPostQuery(post, i))
                         queries.push(q)
                     })
 
@@ -83,8 +139,12 @@ class Database {
                 .catch((err) => {
                     console.log(err)
                     return conn.rollback()
+                }).then(() => {
+                    return conn.release()
                 })
             })
+        }).catch((err) => {
+            console.log(err)
         })
     }
 }
