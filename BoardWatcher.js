@@ -14,17 +14,21 @@ class BoardWatcher {
 		})
 		
 		
-		setTimeout(()=> this.poll(), 1000)
+		setTimeout(()=> this.poll(), 10000)
 	}
 	
 	start() {
 		this.poll()
 	}
 
-	processThreads(board, threadList) {
+	processThreads(board, threadListObject) {
+		if(threadListObject.noUpdate)
+			return
+
 		let oldThreads = board.getThreads()
 
 		let threadMap = new HashMap()
+		let threadList = threadListObject.list
 
 		threadList.forEach((val, key) => {
 			threadMap.set(val.no, val)
@@ -60,7 +64,6 @@ class BoardWatcher {
 			
 		})
 	}
-	
 }
 
 module.exports = BoardWatcher
