@@ -138,6 +138,17 @@ class Board {
 
 		this.database.insertThread(this.name, thread)
 	}
+
+	markDeleted(thread, forced) {
+		if(!this.threads.has(thread.no))
+			throw new Error(util.format("Thread %s in board %s double free. ". thread.no, this.name))
+
+		if(forced) {
+			this.database.markDeletedThread(this.name, thread)
+		}
+
+		this.threads.remove(thread.no)
+	}
 }
 
 module.exports = Board;

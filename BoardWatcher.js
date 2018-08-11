@@ -43,6 +43,7 @@ class BoardWatcher {
 			if(!exists) {
 				// Thread was deleted
 				let forced = val.getPage() < 10;
+				board.markDeleted(thread, forced)
 			}
 
 			if(exists)
