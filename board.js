@@ -117,13 +117,18 @@ class Board {
 		})
 	}
 
-	insertThread(thread) {
+	setupThread(thread) {
 		if(!this.threads.has(thread.no)) {
 			this.threads.set(thread.no, thread)
 		} else {
 			throw new Error(util.format("Duplicate thread %s in board %s", thread.no, this.name))
 		}
+	}
 
+	insertThread(thread) {
+		if(!this.threads.has(thread.no))
+			throw new Error(util.format("Thread %s in board %s inserted but not setup.". thread.no, this.name))
+			
 		this.database.insertThread(this.name, thread)
 	}
 }

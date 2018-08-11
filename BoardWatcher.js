@@ -41,11 +41,13 @@ class BoardWatcher {
 				let forced = val.getPage() < 10;
 			}
 
-			threadMap.remove(val.no)
+			if(exists)
+				threadMap.remove(val.no)
 		})
 
 		threadMap.forEach((val) => {
 			// New Thread
+			board.setupThread(val)
 			board.requestThread(val).then((threadRequest) => {
 				if(threadRequest.statusCode == 404) {
 					//We missed it?
