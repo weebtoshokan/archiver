@@ -55,24 +55,31 @@ class Board {
 		}).then(([response, body]) => {
 			if(response.headers['last-modified'])
 				this.setLastModified(response.headers['last-modified'])
+
+			let threadListObject = {}
+			threadListObject.statusCode = response.statusCode
+			threadListObject.noUpdate = false
 			
 			if(response.statusCode == 200) {
-				return JSON.parse(response.body)
+				threadListObject.list = JSON.parse(response.body)
 			} else if(response.statusCode == 304) {
-				return []
+				threadListObject.noUpdate = true
 			} else {
 				throw new Error("HTTP Request failed. Status code " + response.statusCode)
 			}
+
+			return threadListObject
 		}).then((obj) => {
 			let list = []
-			obj.forEach((threadList) => {
+			obj.list.forEach((threadList) => {
 				threadList['threads'].forEach((thread) => {
 					thread.page = threadList.page
 					Object.setPrototypeOf(thread, Thread.prototype)
 					list.push(thread)
 				})
 			})
-			return list
+			obj.list = list
+			return obj
 		}).catch((err) => {
 			console.log(err)
 		})
@@ -128,7 +135,7 @@ class Board {
 	insertThread(thread) {
 		if(!this.threads.has(thread.no))
 			throw new Error(util.format("Thread %s in board %s inserted but not setup.". thread.no, this.name))
-			
+
 		this.database.insertThread(this.name, thread)
 	}
 }
