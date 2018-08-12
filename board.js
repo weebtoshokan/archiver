@@ -59,6 +59,7 @@ class Board {
 			let threadListObject = {}
 			threadListObject.statusCode = response.statusCode
 			threadListObject.noUpdate = false
+			threadListObject.list = []
 			
 			if(response.statusCode == 200) {
 				threadListObject.list = JSON.parse(response.body)
