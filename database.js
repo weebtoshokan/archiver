@@ -157,7 +157,7 @@ class Database {
         })
     }
 
-    formatMarkDleted(post) {
+    formatMarkDeleted(post) {
         let p = []
 
         p.push(true)
