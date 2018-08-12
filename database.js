@@ -39,6 +39,10 @@ class Database {
                 'sticky, locked, poster_hash, poster_country, exif) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? FROM DUAL ' +
                 'WHERE NOT EXISTS (SELECT 1 FROM `%s` WHERE num = ? AND subnum = ?) AND NOT EXISTS (SELECT 1 FROM `%s` WHERE num = ? AND subnum = ?)',
                 board, board, board + '_deleted')
+
+            queryObject.markDeleted = util.format(
+                'UPDATE `%s` SET deleted = ?, timestamp_expired = ? WHERE num = ? AND subnum = ?',
+                board)
           
 
             this.boardQueries.set(board, queryObject)
@@ -136,6 +140,44 @@ class Database {
             /* Transactions were causing lots of deadlocks, wasting resources. We ditch them in favor
             of speed. I'm not convinced transactionless thread entry is any more dangerous, either. 
             */
+
+            Promise.all(queries)
+            .then(() => {
+                return conn.commit()
+            })
+            .then(() => {
+                return conn.release()
+            })
+            .catch((err) => {
+                console.log(err)
+                conn.release()
+            })
+        }).catch((err) => {
+            console.log(err)
+        })
+    }
+
+    formatMarkDleted(post) {
+        let p = []
+
+        p.push(true)
+        p.push(+ new Date())
+        p.push(post.no)
+        p.push(0)
+
+        return p
+    }
+
+    markDeletedThread(board, thread) {
+        let queryObject = this.getBoard(board)
+
+        this.pool.getConnection().then((conn) => {
+            let queries = []
+            
+            thread.posts.forEach((post, i) => {
+                let q = conn.execute(queryObject.markDeleted, this.formatMarkDeleted(post))
+                queries.push(q)
+            })
 
             Promise.all(queries)
             .then(() => {
