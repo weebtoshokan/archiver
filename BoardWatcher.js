@@ -35,19 +35,21 @@ class BoardWatcher {
 		})
 
 		oldThreads.forEach((val) => {
-			let exists = threadMap.has(val.no)
-			if(exists && threadMap.get(val.no).last_modified !== val.last_modified) {
-				// Thread updated
-			}
-			
-			if(!exists) {
+			let newThread = threadMap.get(val.no)
+
+			if(newThread) {
+				if(newThread.getModified() !== val.getModified()) {
+					// Thread updated
+				}
+
+				val.setModified(newThread.getModified())
+				val.setPage(newThread.getPage())
+				threadMap.remove(val.no)
+			} else {
 				// Thread was deleted
 				let forced = val.getPage() < 10;
 				board.markDeleted(val, forced)
 			}
-
-			if(exists)
-				threadMap.remove(val.no)
 		})
 
 		threadMap.forEach((val) => {
@@ -59,7 +61,7 @@ class BoardWatcher {
 					return
 				}
 
-				val.posts = threadRequest.posts
+				val.setPosts(threadRequest.posts)
 				board.insertThread(val)
 			})
 			
