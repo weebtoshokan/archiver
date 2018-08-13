@@ -34,35 +34,35 @@ class BoardWatcher {
 			threadMap.set(val.no, val)
 		})
 
-		oldThreads.forEach((val) => {
-			let newThread = threadMap.get(val.no)
+		oldThreads.forEach((oldThread) => {
+			let newThread = threadMap.get(oldThread.no)
 
 			if(newThread) {
-				if(newThread.getModified() !== val.getModified()) {
-					// Thread updated
+				if(newThread.getModified() !== oldThread.getModified()) {
+					board.updateThread(oldThread)
 				}
 
-				val.setModified(newThread.getModified())
-				val.setPage(newThread.getPage())
-				threadMap.remove(val.no)
+				oldThread.setModified(newThread.getModified())
+				oldThread.setPage(newThread.getPage())
+				threadMap.remove(oldThread.no)
 			} else {
 				// Thread was deleted
-				let forced = val.getPage() < 10;
-				board.markDeleted(val, forced)
+				let forced = oldThread.getPage() < 10;
+				board.markDeleted(oldThread, forced)
 			}
 		})
 
-		threadMap.forEach((val) => {
+		threadMap.forEach((newThread) => {
 			// New Thread
-			board.setupThread(val)
-			board.requestThread(val).then((threadRequest) => {
+			board.setupThread(newThread)
+			board.requestThread(newThread).then((threadRequest) => {
 				if(threadRequest.statusCode == 404) {
 					//We missed it?
 					return
 				}
 
-				val.setPosts(threadRequest.posts)
-				board.insertThread(val)
+				newThread.setPosts(threadRequest.posts)
+				board.insertThread(newThread)
 			})
 			
 		})
