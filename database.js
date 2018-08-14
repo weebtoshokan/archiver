@@ -59,6 +59,9 @@ class Database {
     }
 
     cleanInput(str) {
+        if(!str)
+            return null
+
         const entities = new Entities()
 
         return entities.decode(str).trim()
@@ -92,7 +95,7 @@ class Database {
         p.push(this.cleanComment(post.getComment()))
         p.push('')
         p.push(post.getSticky())
-        p.push(post.getLocked())
+        p.push(post.getClosed())
         p.push(post.getId())
         p.push(post.getCountry())
         p.push('')
@@ -105,6 +108,9 @@ class Database {
     }
 
     cleanComment(str) {
+        if(!str)
+            return null
+
         str = str.replace(/<br>/g, "\n")
         str = str.replace(/<a[^>]*>(.*?)<\/a>/g, "$1")
         str = str.replace(/<span class=\"quote\">(.*?)<\/span>/g, "$1")
