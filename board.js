@@ -3,6 +3,7 @@ const request = require('request')
 const network = require('./network')
 const HashMap = require('hashmap')
 const Thread = require('./thread')
+const Post = require('./post')
 
 class Board {
 	constructor(name, database) {
@@ -115,7 +116,8 @@ class Board {
 			}
 			if(response.statusCode == 200) {
 				let threadObject = JSON.parse(response.body)
-				responseObject.posts = threadObject.posts
+				responseObject.posts = threadObject.posts.map((post) => new Post(post))
+
 			} else if( !(response.statusCode == 304 || response.statusCode == 404) ) {
 				throw new Error("HTTP Request failed. Status code " + response.statusCode)
 			}
