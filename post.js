@@ -6,28 +6,63 @@ class Post {
         this.tim = 0
         this.tn_w = 0
         this.tn_h = 0
-        this.filename = ''
+        this.filename = null
         this.w = 0
         this.h = 0
         this.fsize = 0
-        this.md5 = ''
-        this.ext = ''
+        this.md5 = null
+        this.ext = null
         this.spoiler = 0
-        this.capcode = ''
-        this.name = ''
-        this.sub = ''
-        this.com = ''
-        this.trip = ''
+        this.capcode = null
+        this.name = null
+        this.sub = null
+        this.com = null
+        this.trip = null
         this.sticky = 0
         this.closed = 0
         this.archived = 0
-        this.id = ''
-        this.country = ''
+        this.id = null
+        this.country = null
         this.filedeleted = 0
+
+        this.mediaFileName = null
+        this.mediaOrig = null
+        this.previewOrig = null
 
         for(let key in obj) {
             this[key] = obj[key]
         }
+
+        if(this.getFileName() && this.getExt()) {
+            this.mediaFileName = this.getFileName() + this.getExt()
+            this.mediaOrig = this.getTim() + this.getExt()
+            this.previewOrig = this.getTim() + "s.jpg"
+        }
+
+        if(this.getCountry() === "XX" || this.getCountry() === "A1")  {
+            this.country = null
+        }
+
+        if(this.getId() === "Developer")
+            this.id = "Dev"
+
+        if(this.capcode && this.capcode.length >= 1) {
+            this.capcode = this.capcode.substring(0, 1).toUpperCase()
+        } else {
+            this.capcode = 'N'
+        }
+    }
+
+    getMediaFileName() {
+        return this.mediaFileName
+    }
+
+    getMediaOrig() {
+        return this.mediaOrig
+    }
+
+    getPreviewOrig() {
+        return this.previewOrig
     }
 
     getNum() {
@@ -122,3 +157,5 @@ class Post {
         return this.filedeleted
     }
 }
+
+module.exports = Post
