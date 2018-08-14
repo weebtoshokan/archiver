@@ -67,53 +67,38 @@ class Database {
     formatPostQuery(post) {
         let p = []
         
-        let ext = post.ext || ''
-
-        let capcode = 'N'
-        if(post.capcode && post.capcode.length >= 1) {
-            capcode = post.capcode.substring(0, 1).toUpperCase()
-        }
-
-        let posterHash = post.id || ''
-        if(posterHash == "Developer") 
-            posterHash = "Dev";
-
-        let posterCountry = post.country || ''
-        if(posterCountry === "XX" || posterCountry === "A1") 
-            posterCountry = '';
-
         p.push('')
-        p.push(post.no)
+        p.push(post.getNum())
         p.push(0)
-        p.push(post.resto == 0 ? post.no : post.resto)
-        p.push(post.resto == 0)
-        p.push(post.time) //asagi appears to be subtracting 4 hours from the timestamp, investigate
-        p.push(post.tim ? post.tim + 's.jpg' : '')
-        p.push(post.tn_w || 0)
-        p.push(post.tn_h || 0)
-        p.push(post.filename ? post.filename + ext : '')
-        p.push(post.w || 0)
-        p.push(post.h || 0)
-        p.push(post.fsize || 0)
-        p.push(post.md5 || '')
-        p.push(post.tim ? post.tim + ext : '')
-        p.push(post.spoiler || 0)
+        p.push(post.getNum() == 0 ? post.getNum() : post.getReply())
+        p.push(post.getReply() == 0)
+        p.push(post.getTime()) //asagi appears to be subtracting 4 hours from the timestamp, investigate
+        p.push(post.getPreviewOrig())
+        p.push(post.getPreviewW())
+        p.push(post.getPreviewH())
+        p.push(post.getMediaFileName())
+        p.push(post.getMediaW())
+        p.push(post.getMediaH())
+        p.push(post.getSize())
+        p.push(post.getHash())
+        p.push(post.getMediaOrig())
+        p.push(post.getSpoiler())
         p.push(false)
-        p.push(capcode)
+        p.push(post.getCapcode())
         p.push('')
-        p.push(this.cleanInput(post.name || ''))
-        p.push(post.trip || '')
-        p.push(this.cleanInput(post.sub || ''))
-        p.push(this.cleanComment(post.com || ''))
+        p.push(this.cleanInput(post.getName()))
+        p.push(post.getTrip())
+        p.push(this.cleanInput(post.getSubject()))
+        p.push(this.cleanComment(post.getComment()))
         p.push('')
-        p.push(post.sticky || 0)
-        p.push(post.locked || 0)
-        p.push(posterHash)
-        p.push(posterCountry)
+        p.push(post.getSticky())
+        p.push(post.getLocked())
+        p.push(post.getId())
+        p.push(post.getCountry())
         p.push('')
-        p.push(post.no)
+        p.push(post.getNum())
         p.push(0)
-        p.push(post.no)
+        p.push(post.getNum())
         p.push(0)
 
         return p
@@ -168,13 +153,13 @@ class Database {
         return p
     }
 
-    markDeletedThread(board, thread) {
+    markDeletedPosts(board, posts) {
         let queryObject = this.getBoard(board)
 
         this.pool.getConnection().then((conn) => {
             let queries = []
             
-            thread.posts.forEach((post, i) => {
+            posts.forEach((post, i) => {
                 let q = conn.execute(queryObject.markDeleted, this.formatMarkDeleted(post))
                 queries.push(q)
             })
