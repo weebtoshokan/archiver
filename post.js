@@ -51,6 +51,10 @@ class Post {
         } else {
             this.capcode = 'N'
         }
+
+        if(this.getArchived() && this.getClosed()) {
+            this.closed = 0
+        }
     }
 
     getMediaFileName() {
@@ -155,6 +159,10 @@ class Post {
 
     getDeleted() {
         return this.filedeleted
+    }
+    
+    getSticky() {
+        return this.sticky
     }
 }
 
