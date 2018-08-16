@@ -40,16 +40,27 @@ class Database {
                 'media_w, media_h, media_size, media_hash, media_orig, spoiler, deleted, capcode, email, name, trip, title, comment, delpass, ' +
                 'sticky, locked, poster_hash, poster_country, exif) SELECT ?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,? FROM DUAL ' +
                 'WHERE NOT EXISTS (SELECT 1 FROM `%s` WHERE num = ? AND subnum = ?) AND NOT EXISTS (SELECT 1 FROM `%s` WHERE num = ? AND subnum = ?)',
-                board, board, board + '_deleted')
+                board.getName(), board.getName(), board.getName() + '_deleted')
 
             queryObject.markDeleted = util.format(
                 'UPDATE `%s` SET deleted = ?, timestamp_expired = ? WHERE num = ? AND subnum = ?',
-                board)
+                board.getName())
 
             queryObject.selectMedia = util.format(
                 'SELECT * FROM `%s_images` WHERE media_hash = ?',
-                board)
-          
+                board.getName())
+
+            queryObject.updateMedia = util.format(
+                'UPDATE `%s_images` SET media = ? WHERE media_hash = ?', 
+                board.getName());
+
+            queryObject.updatePreviewOp = util.format(
+                'UPDATE `%s_images` SET preview_op = ? WHERE media_hash = ?', 
+                board.getName());
+
+            queryObject.updatePreview = util.format(
+                'UPDATE `%s_images` SET preview_reply = ? WHERE media_hash = ?', 
+                board.getName());
 
             this.boardQueries.set(board.getName(), queryObject)
         } else {
@@ -187,7 +198,7 @@ class Database {
     }
 
     _updateMedia() {
-        
+
     }
 
     formatMarkDeleted(post) {
