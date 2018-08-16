@@ -197,8 +197,20 @@ class Database {
         }
     }
 
-    _updateMedia() {
+    _updateMedia(conn, post, row) {
+        let q = []
 
+        if(!row.media) 
+            q.push(conn.execute(queryObject.updateMedia, [post.getMediaOrig(), post.getHash()]))
+
+        if(!row.preview_reply)
+            q.push(conn.execute(queryObject.updatePreview, [post.getPreviewOrig(), post.getHash()]))
+
+        if(!row.preview_op) 
+            q.push(conn.execute(queryObject.updatePreviewOp, [post.getPreviewOrig(), post.getHash()]))
+
+        if(q.length > 0)
+            return Promise.all(q)
     }
 
     formatMarkDeleted(post) {
