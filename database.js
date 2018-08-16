@@ -70,10 +70,10 @@ class Database {
     formatPostQuery(post) {
         let p = []
         
-        p.push('')
+        p.push(0)
         p.push(post.getNum())
         p.push(0)
-        p.push(post.getNum() == 0 ? post.getNum() : post.getReply())
+        p.push(post.getReply() == 0 ? post.getNum() : post.getReply())
         p.push(post.getReply() == 0)
         p.push(post.getTime()) //asagi appears to be subtracting 4 hours from the timestamp, investigate
         p.push(post.getPreviewOrig())
@@ -88,17 +88,17 @@ class Database {
         p.push(post.getSpoiler())
         p.push(false)
         p.push(post.getCapcode())
-        p.push('')
+        p.push(null)
         p.push(this.cleanInput(post.getName()))
         p.push(post.getTrip())
         p.push(this.cleanInput(post.getSubject()))
         p.push(this.cleanComment(post.getComment()))
-        p.push('')
+        p.push(null)
         p.push(post.getSticky())
         p.push(post.getClosed())
         p.push(post.getId())
         p.push(post.getCountry())
-        p.push('')
+        p.push(null)
         p.push(post.getNum())
         p.push(0)
         p.push(post.getNum())
@@ -132,6 +132,33 @@ class Database {
             of speed. I'm not convinced transactionless thread entry is any more dangerous, either. 
             */
 
+            Promise.all(queries)
+            .then(() => {
+                return conn.commit()
+            })
+            .then(() => {
+                return conn.release()
+            })
+            .catch((err) => {
+                console.log(err)
+                conn.release()
+            })
+        }).catch((err) => {
+            console.log(err)
+        })
+    }
+
+    insertPosts(board, posts) {
+        let queryObject = this.getBoard(board)
+
+        this.pool.getConnection().then((conn) => {
+            let queries = []
+            
+            posts.forEach((post, i) => {
+                let q = conn.execute(queryObject.insert, this.formatPostQuery(post, i))
+                queries.push(q)
+            })
+            
             Promise.all(queries)
             .then(() => {
                 return conn.commit()
