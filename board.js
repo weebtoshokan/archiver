@@ -24,6 +24,10 @@ class Board {
 	getThreadLink(threadID) {
 		return util.format("https://a.4cdn.org/%s/thread/%s.json", this.name, threadID)
 	}
+
+	getMediaLink(file) {
+		return util.format("http(s)://i.4cdn.org/%s/%s", this.name, file)
+	}
 	
 	setLastModified(date) {
 		this.lastModified = date
