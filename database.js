@@ -75,7 +75,7 @@ class Database {
         p.push(0)
         p.push(post.getReply() == 0 ? post.getNum() : post.getReply())
         p.push(post.getReply() == 0)
-        p.push(post.getTime()) //asagi appears to be subtracting 4 hours from the timestamp, investigate
+        p.push(post.getTime() - (4 * 60 * 60))
         p.push(post.getPreviewOrig())
         p.push(post.getPreviewW())
         p.push(post.getPreviewH())
