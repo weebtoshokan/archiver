@@ -43,6 +43,10 @@ class Database {
             queryObject.markDeleted = util.format(
                 'UPDATE `%s` SET deleted = ?, timestamp_expired = ? WHERE num = ? AND subnum = ?',
                 board)
+
+            queryObject.selectMedia = util.format(
+                'SELECT * FROM `%s_images` WHERE media_hash = ?',
+                board)
           
 
             this.boardQueries.set(board, queryObject)
@@ -107,6 +111,13 @@ class Database {
         return p
     }
 
+    formatSelectMedia(post) {
+        let q = []
+
+        q.push(post.getHash())
+        return q
+    }
+
     cleanComment(str) {
         if(!str)
             return null
@@ -131,13 +142,11 @@ class Database {
             
             posts.forEach((post, i) => {
                 let q = conn.execute(queryObject.insert, this.formatPostQuery(post, i))
+
                 queries.push(q)
             })
             
             Promise.all(queries)
-            .then(() => {
-                return conn.commit()
-            })
             .then(() => {
                 return conn.release()
             })
