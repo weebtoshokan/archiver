@@ -9,8 +9,12 @@ class Board {
 	constructor(name, database) {
 		this.name = name;
 		this.database = database;
-		database.setupBoard(name)
+		database.setupBoard(this)
 		this.threads = new HashMap();
+	}
+
+	getName() {
+		return this.name
 	}
 	
 	getAllThreadsLink() {
@@ -194,6 +198,10 @@ class Board {
 			this.database.markDeletedPosts(this.name, deletedPosts)
 			this.database.insertPosts(this.name, newPosts)
 		})
+	}
+
+	saveMedia() {
+		
 	}
 }
 

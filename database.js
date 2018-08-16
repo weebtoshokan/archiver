@@ -30,8 +30,10 @@ class Database {
     }
 
     setupBoard(board) {
-        if(!this.boardQueries.has(board)) {
+        if(!this.boardQueries.has(board.getName())) {
             let queryObject = {}
+
+            queryObject.board = board
 
             queryObject.insert = util.format(
                 'INSERT INTO `%s` (poster_ip, num, subnum, thread_num, op, timestamp, preview_orig, preview_w, preview_h, media_filename, ' +
@@ -49,7 +51,7 @@ class Database {
                 board)
           
 
-            this.boardQueries.set(board, queryObject)
+            this.boardQueries.set(board.getName(), queryObject)
         } else {
             throw new Error("Duplicate board initialized. Check your configs!")
         }
@@ -143,6 +145,10 @@ class Database {
             posts.forEach((post, i) => {
                 let q = conn.execute(queryObject.insert, this.formatPostQuery(post, i))
 
+                q.then(() => {
+                    return this._insertMedia(post, conn, queryObject)
+                })
+
                 queries.push(q)
             })
             
@@ -157,6 +163,31 @@ class Database {
         }).catch((err) => {
             console.log(err)
         })
+    }
+
+    _insertMedia(post, conn, queryObject) {
+        if(post.getMediaOrig() || post.getPreviewOrig()) {
+            return conn.execute(queryObject.selectMedia, this.formatSelectMedia(post))
+            .then(([rows]) => {
+                if(rows[0].banned) {
+                    return
+                }
+
+                if(post.getMediaOrig()) {
+                    queryObject.board.saveMedia(post)
+                }
+
+                if(post.getPreviewOrig()) {
+                    queryObject.board.saveMedia(post, true)
+                }
+
+                return this._updateMedia(conn, post, rows[0])
+            })
+        }
+    }
+
+    _updateMedia() {
+        
     }
 
     formatMarkDeleted(post) {
