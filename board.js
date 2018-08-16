@@ -97,7 +97,7 @@ class Board {
 		}
 
 		if(thread.getLastMod())
-			opt.headers['If-Modified-Since'] = this.getLastMod()
+			opt.headers['If-Modified-Since'] = thread.getLastMod()
 
 		return new Promise((resolve, reject) => {
 			request.get(opt, (error, response, body) => {
@@ -117,8 +117,9 @@ class Board {
 			if(response.statusCode == 200) {
 				let threadObject = JSON.parse(response.body)
 				responseObject.posts = threadObject.posts.map((post) => new Post(post))
-
-			} else if( !(response.statusCode == 304 || response.statusCode == 404) ) {
+			} else if(response.statusCode == 304 || response.statusCode == 404) {
+				responseObject.noPosts = true
+			} else {
 				throw new Error("HTTP Request failed. Status code " + response.statusCode)
 			}
 			return responseObject;
@@ -147,10 +148,52 @@ class Board {
 			throw new Error(util.format("Thread %s in board %s double free. ". thread.no, this.name))
 
 		if(forced) {
-			this.database.markDeletedThread(this.name, thread)
+			this.database.markDeletedPosts(this.name, thread.getPosts())
 		}
 
 		this.threads.remove(thread.no)
+	}
+
+	diffPost(lhs, rhs) {
+		return false
+	}
+
+	updateThread(oldThread) {
+		let oldThreadMap = new HashMap()
+		let newPosts = []
+		let updatedPosts = []
+		let deletedPosts = []
+
+		oldThread.getPosts().forEach((post) => {
+			oldThreadMap.set(post.getNum(), post)
+		})
+
+		this.requestThread(oldThread)
+		.then((newThread) => {
+			if(newThread.noPosts) {
+				console.log('[Debug] Thread had no posts!')
+				console.log(newThread.code)
+				return
+			}
+
+			newThread.posts.forEach((post) => {
+				if(oldThreadMap.has(post.getNum())) {
+					if(this.diffPost(post, oldThreadMap.get(post.getNum())))
+						updatedPosts.append(post)
+					
+					oldThreadMap.remove(post.getNum())
+				} else {
+					newPosts.push(post)
+				}
+			})
+
+			oldThreadMap.forEach((deletedPost) => {
+				deletedPosts.append(deletedPost)
+			})
+			console.log(newPosts)
+			this.database.markDeletedPosts(this.name, deletedPosts)
+			this.database.insertPosts(this.name, newPosts)
+		})
 	}
 }
 
