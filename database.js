@@ -120,32 +120,7 @@ class Database {
     insertThread(board, thread) {
         let queryObject = this.getBoard(board)
 
-        this.pool.getConnection().then((conn) => {
-            let queries = []
-            
-            thread.posts.forEach((post, i) => {
-                let q = conn.execute(queryObject.insert, this.formatPostQuery(post, i))
-                queries.push(q)
-            })
-
-            /* Transactions were causing lots of deadlocks, wasting resources. We ditch them in favor
-            of speed. I'm not convinced transactionless thread entry is any more dangerous, either. 
-            */
-
-            Promise.all(queries)
-            .then(() => {
-                return conn.commit()
-            })
-            .then(() => {
-                return conn.release()
-            })
-            .catch((err) => {
-                console.log(err)
-                conn.release()
-            })
-        }).catch((err) => {
-            console.log(err)
-        })
+        this.insertPosts(board, thread.posts)
     }
 
     insertPosts(board, posts) {
