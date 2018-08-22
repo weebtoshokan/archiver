@@ -192,12 +192,12 @@ class Database {
                     queryObject.board.saveMedia(post, true)
                 }
 
-                return this._updateMedia(conn, post, rows[0])
+                return this._updateMedia(conn, post, rows[0], queryObject)
             })
         }
     }
 
-    _updateMedia(conn, post, row) {
+    _updateMedia(conn, post, row, queryObject) {
         let q = []
 
         if(!row.media) 
