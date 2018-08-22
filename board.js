@@ -4,6 +4,8 @@ const network = require('./network')
 const HashMap = require('hashmap')
 const Thread = require('./thread')
 const Post = require('./post')
+const local = require('./local')
+const path = require('path')
 
 class Board {
 	constructor(name, database) {
@@ -201,11 +203,27 @@ class Board {
 			console.log(newPosts)
 			this.database.markDeletedPosts(this.name, deletedPosts)
 			this.database.insertPosts(this.name, newPosts)
+			//this.database.updatePosts(this.name, updatedPosts)
 		})
 	}
 
-	saveMedia() {
+	async saveMedia(post, preview) {
+		let name = preview ? post.getPreviewOrig() : post.getMediaOrig()
+		let link = this.getMediaLink(name)
+		let folder = preview ? "thumb" : "image"
+		let imgPath = local.getFileDir(name)
+
+		let file = path.join('tempConfig', 'boards', this.name, folder, imgPath)
+		let exists = await local.checkExists(file)
+
+		if(exists)
+			return;
+
+		await local.mkdir(path.dirname(file))
+
 		
+
+
 	}
 }
 
