@@ -224,7 +224,6 @@ class Board {
 
 
 		let stream = fs.createWriteStream(file, {encoding:'binary', flag:'wx'})
-		console.log(link)
 		request.get(link)
 		.on('error', (err) => {
 			console.log(err)
