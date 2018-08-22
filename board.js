@@ -6,6 +6,7 @@ const Thread = require('./thread')
 const Post = require('./post')
 const local = require('./local')
 const path = require('path')
+const fs = require('fs')
 
 class Board {
 	constructor(name, database) {
@@ -28,7 +29,7 @@ class Board {
 	}
 
 	getMediaLink(file) {
-		return util.format("http(s)://i.4cdn.org/%s/%s", this.name, file)
+		return util.format("https://i.4cdn.org/%s/%s", this.name, file)
 	}
 	
 	setLastModified(date) {
@@ -221,7 +222,17 @@ class Board {
 
 		await local.mkdir(path.dirname(file))
 
-		
+
+		let stream = fs.createWriteStream(file, {encoding:'binary', flag:'wx'})
+		console.log(link)
+		request.get(link)
+		.on('error', (err) => {
+			console.log(err)
+		})
+		.pipe(stream)
+		.on('error', (err) => {
+			console.log(err)
+		})
 
 
 	}
