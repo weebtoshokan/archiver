@@ -7,6 +7,12 @@ const Post = require('./post')
 const local = require('./local')
 const path = require('path')
 const fs = require('fs')
+const Bottleneck = require('bottleneck')
+
+const queue = new Bottleneck({
+    maxConcurrent: 40,
+    minTime: 200
+});
 
 class Board {
 	constructor(name, database) {
@@ -215,25 +221,46 @@ class Board {
 		let imgPath = local.getFileDir(name)
 
 		let file = path.join('tempConfig', 'boards', this.name, folder, imgPath)
+		let tmpFile = path.join('tempConfig', 'boards', this.name, 'tmp', name)
 		let exists = await local.checkExists(file)
 
 		if(exists)
 			return;
 
+		await local.mkdir(path.dirname(tmpFile))
+
+		await queue.schedule(() => {
+			return new Promise((resolve, reject) => {
+				let stream = fs.createWriteStream(tmpFile, {encoding:'binary', flag:'w'})
+				request.get(link)
+				.on('error', (err) => {
+					console.log(err)
+					reject()
+				})
+				.on('response', (response) => {
+					if(response.statusCode == 404) {
+						//Not found
+						console.log(response.statusCode)
+						this.abort()
+					} else if(response.statusCode != 200) {
+						//Error, requeue?
+						console.log(response.statusCode)
+						this.abort()
+					}
+				})
+				.pipe(stream)
+				.on('error', (err) => {
+					console.log(err)
+					reject()
+				}).on('finish', () => {
+					resolve()
+				})
+			})
+		})
+
 		await local.mkdir(path.dirname(file))
 
-
-		let stream = fs.createWriteStream(file, {encoding:'binary', flag:'wx'})
-		request.get(link)
-		.on('error', (err) => {
-			console.log(err)
-		})
-		.pipe(stream)
-		.on('error', (err) => {
-			console.log(err)
-		})
-
-
+		await local.mvFile(tmpFile, file)
 	}
 }
 
