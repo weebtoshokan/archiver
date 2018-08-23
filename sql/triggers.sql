@@ -1,7 +1,5 @@
 DROP PROCEDURE IF EXISTS update_thread_%%BOARD%%;
 
-DELIMITER //
-
 CREATE PROCEDURE update_thread_%%BOARD%% (tnum INT)
 BEGIN
   UPDATE
@@ -48,38 +46,27 @@ BEGIN
     )
     WHERE op.thread_num = tnum;
 END;
-//
 
-DELIMITER ;
 
 DROP PROCEDURE IF EXISTS create_thread_%%BOARD%%;
-
-DELIMITER //
 
 CREATE PROCEDURE create_thread_%%BOARD%% (num INT, timestamp INT)
 BEGIN
   INSERT IGNORE INTO %%BOARD%%_threads VALUES (num, timestamp, timestamp,
     timestamp, NULL, NULL, timestamp, 0, 0, 0, 0);
 END;
-//
 
-DELIMITER ;
 
 DROP PROCEDURE IF EXISTS delete_thread_%%BOARD%%;
-
-DELIMITER //
 
 CREATE PROCEDURE delete_thread_%%BOARD%% (tnum INT)
 BEGIN
   DELETE FROM %%BOARD%%_threads WHERE thread_num = tnum;
 END;
-//
 
-DELIMITER ;
 
 DROP PROCEDURE IF EXISTS insert_image_%%BOARD%%;
 
-DELIMITER //
 CREATE PROCEDURE insert_image_%%BOARD%% (n_media_hash VARCHAR(25),
  n_media VARCHAR(20), n_preview VARCHAR(20), n_op INT)
 BEGIN
@@ -101,27 +88,18 @@ BEGIN
       media = COALESCE(media, VALUES(media));
   END IF;
 END;
-//
-
-DELIMITER ;
 
 DROP PROCEDURE IF EXISTS delete_image_%%BOARD%%;
 
-DELIMITER //
 
 CREATE PROCEDURE delete_image_%%BOARD%% (n_media_id INT)
 BEGIN
   UPDATE %%BOARD%%_images SET total = (total - 1) WHERE media_id = n_media_id;
 END;
 
-//
-
-DELIMITER ;
-
 
 DROP PROCEDURE IF EXISTS insert_post_%%BOARD%%;
 
-DELIMITER //
 CREATE PROCEDURE insert_post_%%BOARD%% (p_timestamp INT, p_media_hash VARCHAR(25),
   p_email VARCHAR(100), p_name VARCHAR(100), p_trip VARCHAR(25))
 BEGIN
@@ -158,13 +136,9 @@ BEGIN
       name = COALESCE(p_name, '');
   END IF;
 END;
-//
-
-DELIMITER ;
 
 DROP PROCEDURE IF EXISTS delete_post_%%BOARD%%;
 
-DELIMITER //
 CREATE PROCEDURE delete_post_%%BOARD%% (p_timestamp INT, p_media_hash VARCHAR(25), p_email VARCHAR(100), p_name VARCHAR(100), p_trip VARCHAR(25))
 BEGIN
   DECLARE d_day INT;
@@ -192,13 +166,9 @@ BEGIN
       name = COALESCE(p_name, '') AND trip = COALESCE(p_trip, '');
   END IF;
 END;
-//
 
-DELIMITER ;
 
 DROP TRIGGER IF EXISTS before_ins_%%BOARD%%;
-
-DELIMITER //
 
 CREATE TRIGGER before_ins_%%BOARD%% BEFORE INSERT ON %%BOARD%%
 FOR EACH ROW
@@ -208,13 +178,9 @@ BEGIN
     SET NEW.media_id = LAST_INSERT_ID();
   END IF;
 END;
-//
-
-DELIMITER ;
 
 DROP TRIGGER IF EXISTS after_ins_%%BOARD%%;
 
-DELIMITER //
 
 CREATE TRIGGER after_ins_%%BOARD%% AFTER INSERT ON %%BOARD%%
 FOR EACH ROW
@@ -226,11 +192,9 @@ BEGIN
   CALL insert_post_%%BOARD%%(NEW.timestamp, NEW.media_hash, NEW.email, NEW.name, NEW.trip);
 END;
 
-DELIMITER ;
 
 DROP TRIGGER IF EXISTS after_del_%%BOARD%%;
 
-DELIMITER //
 
 CREATE TRIGGER after_del_%%BOARD%% AFTER DELETE ON %%BOARD%%
 FOR EACH ROW
@@ -244,6 +208,4 @@ BEGIN
     CALL delete_image_%%BOARD%%(OLD.media_id);
   END IF;
 END;
-//
 
-DELIMITER ;
