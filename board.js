@@ -207,7 +207,7 @@ class Board {
 			oldThreadMap.forEach((deletedPost) => {
 				deletedPosts.append(deletedPost)
 			})
-			console.log(newPosts)
+
 			this.database.markDeletedPosts(this.name, deletedPosts)
 			this.database.insertPosts(this.name, newPosts)
 			//this.database.updatePosts(this.name, updatedPosts)
@@ -241,11 +241,11 @@ class Board {
 					if(response.statusCode == 404) {
 						//Not found
 						console.log(response.statusCode)
-						this.abort()
+						response.abort()
 					} else if(response.statusCode != 200) {
 						//Error, requeue?
 						console.log(response.statusCode)
-						this.abort()
+						response.abort()
 					}
 				})
 				.pipe(stream)
