@@ -2,6 +2,7 @@ const mysql = require('mysql2/promise')
 const HashMap = require('hashmap')
 const util = require('util')
 const Entities = require('html-entities').AllHtmlEntities;
+const local = require('./local')
 
 
 
@@ -25,7 +26,38 @@ class Database {
             database: this.database,
             waitForConnections: true,
             connectionLimit: 1,
-            queueLimit: 0
+            queueLimit: 0,
+            multipleStatements: true
+        })
+    }
+
+    checkTables(queryObject) {
+        this.pool.getConnection().then((conn) => {
+            conn.execute(queryObject.checkTable)
+            .then(([rows]) => {
+                if(rows.length < 999) {
+                    return local.readFile('sql/boards.sql')
+                    .then((data) => conn.query(
+                        data.toString().replace(/%%BOARD%%/g, queryObject.board.getName())
+                        .replace(/%%CHARSET%%/g, 'utf8mb4')
+                    ))
+                    .then(() => local.readFile('sql/common.sql'))
+                    .then((data) => conn.query(data.toString()))
+                    .then(() => local.readFile('sql/triggers.sql'))
+                    .then((data) => conn.query(
+                        data.toString('utf8').replace(/%%BOARD%%/g, queryObject.board.getName())
+                    ))
+                }
+            })
+            .then(() => {
+                return conn.release()
+            })
+            .catch((err) => {
+                console.log(err)
+                conn.release()
+            })
+        }).catch((err) => {
+            console.log(err)
         })
     }
 
@@ -62,7 +94,12 @@ class Database {
                 'UPDATE `%s_images` SET preview_reply = ? WHERE media_hash = ?', 
                 board.getName());
 
+            queryObject.checkTable = util.format('SHOW TABLES LIKE \'%s\'',
+                board.getName());
+
             this.boardQueries.set(board.getName(), queryObject)
+
+            this.checkTables(queryObject)
         } else {
             throw new Error("Duplicate board initialized. Check your configs!")
         }
@@ -138,6 +175,9 @@ class Database {
         str = str.replace(/<br>/g, "\n")
         str = str.replace(/<a[^>]*>(.*?)<\/a>/g, "$1")
         str = str.replace(/<span class=\"quote\">(.*?)<\/span>/g, "$1")
+        str = str.replace(/<a[^>]*>(.*?)<\/a>/g, "$1")
+        str = str.replace(/<s>/g, "[spoiler]")
+        str = str.replace(/<\/s>/g, "[/spoiler]")
         return this.cleanInput(str)
     }
 
