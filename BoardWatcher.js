@@ -58,6 +58,7 @@ class BoardWatcher {
 			board.requestThread(newThread).then((threadRequest) => {
 				if(threadRequest.statusCode == 404) {
 					//We missed it?
+					board.markDeleted(newThread)
 					return
 				}
 
