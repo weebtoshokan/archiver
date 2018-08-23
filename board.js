@@ -231,29 +231,25 @@ class Board {
 
 		await queue.schedule(() => {
 			return new Promise((resolve, reject) => {
-				let stream = fs.createWriteStream(tmpFile, {encoding:'binary', flag:'w'})
-				request.get(link)
+				let req = request.get(link)
 				.on('error', (err) => {
 					console.log(err)
 					reject()
 				})
 				.on('response', (response) => {
-					if(response.statusCode == 404) {
-						//Not found
-						console.log(response.statusCode)
-						response.abort()
-					} else if(response.statusCode != 200) {
+					if(response.statusCode == 200) {
+						let stream = fs.createWriteStream(tmpFile, {encoding:'binary', flag:'w'})
+						req.pipe(stream)
+						.on('error', (err) => {
+							console.log(err)
+							reject()
+						}).on('finish', () => {
+							resolve()
+						})
+					} else if(response.statusCode != 404) {
 						//Error, requeue?
 						console.log(response.statusCode)
-						response.abort()
 					}
-				})
-				.pipe(stream)
-				.on('error', (err) => {
-					console.log(err)
-					reject()
-				}).on('finish', () => {
-					resolve()
 				})
 			})
 		})
