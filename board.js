@@ -14,6 +14,11 @@ const queue = new Bottleneck({
     minTime: 200
 });
 
+const reqQueue = new Bottleneck({
+	maxConcurrent: 10,
+	minTime: 1000
+});
+
 class Board {
 	constructor(name, database) {
 		this.name = name;
@@ -93,7 +98,7 @@ class Board {
 			obj.list.forEach((threadList) => {
 				threadList['threads'].forEach((thread) => {
 					thread.page = threadList.page
-					Object.setPrototypeOf(thread, Thread.prototype)
+					thread = new Thread(thread)
 					list.push(thread)
 				})
 			})
@@ -116,7 +121,7 @@ class Board {
 		if(thread.getLastMod())
 			opt.headers['If-Modified-Since'] = thread.getLastMod()
 
-		return new Promise((resolve, reject) => {
+		return reqQueue.schedule(() => new Promise((resolve, reject) => {
 			request.get(opt, (error, response, body) => {
 				if(error) {
 					reject(error)
@@ -124,21 +129,24 @@ class Board {
 					resolve([response, body])
 				}
 			})
-		}).then(([response, body]) => {
-			if(response.headers['last-modified'])
-				thread.setLastMod(response.headers['last-modified'])
-			
+		})).then(([response, body]) => {
 			let responseObject = {
 				code: response.statusCode
 			}
 			if(response.statusCode == 200) {
+				thread.ping()
 				let threadObject = JSON.parse(response.body)
 				responseObject.posts = threadObject.posts.map((post) => new Post(post))
 			} else if(response.statusCode == 304 || response.statusCode == 404) {
+				thread.ping()
 				responseObject.noPosts = true
 			} else {
 				throw new Error("HTTP Request failed. Status code " + response.statusCode)
 			}
+
+			if(response.headers['last-modified'])
+				thread.setLastMod(response.headers['last-modified'])
+
 			return responseObject;
 		}).catch((err) => {
 			console.log(err)
