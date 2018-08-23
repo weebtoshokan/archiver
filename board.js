@@ -205,7 +205,7 @@ class Board {
 			})
 
 			oldThreadMap.forEach((deletedPost) => {
-				deletedPosts.append(deletedPost)
+				deletedPosts.push(deletedPost)
 			})
 
 			this.database.markDeletedPosts(this.name, deletedPosts)
