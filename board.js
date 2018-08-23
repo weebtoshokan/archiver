@@ -8,16 +8,25 @@ const local = require('./local')
 const path = require('path')
 const fs = require('fs')
 const Bottleneck = require('bottleneck')
+const config = require('./config')
 
 const queue = new Bottleneck({
-    maxConcurrent: 40,
-    minTime: 200
+    maxConcurrent: config.ratelimit.concurrentImageRequests,
+    minTime: config.ratelimit.imageDelay
 });
 
 const reqQueue = new Bottleneck({
-	maxConcurrent: 10,
-	minTime: 1000
+	maxConcurrent: config.ratelimit.concurrentThreadRequests,
+	minTime: config.ratelimit.threadDelay
 });
+
+let temp = () =>{
+	console.log("[Reqest Queue] " + reqQueue.queued())
+	console.log("[Image Queue] " + queue.queued())
+    setTimeout(temp, 10000);
+}
+
+temp()
 
 class Board {
 	constructor(name, database) {
@@ -220,13 +229,19 @@ class Board {
 	}
 
 	async saveMedia(post, preview) {
+		if(!config.misc.archiveImages && !preview)
+			return
+
+		if(!config.misc.archiveThumbs && preview)
+			return
+
 		let name = preview ? post.getPreviewOrig() : post.getMediaOrig()
 		let link = this.getMediaLink(name)
 		let folder = preview ? "thumb" : "image"
 		let imgPath = local.getFileDir(name)
 
-		let file = path.join('tempConfig', 'boards', this.name, folder, imgPath)
-		let tmpFile = path.join('tempConfig', 'boards', this.name, 'tmp', name)
+		let file = path.join(config.path.saveDir, 'boards', this.name, folder, imgPath)
+		let tmpFile = path.join(config.path.saveDir, 'boards', this.name, 'tmp', name)
 		let exists = await local.checkExists(file)
 
 		if(exists)
