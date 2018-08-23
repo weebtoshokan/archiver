@@ -1,4 +1,5 @@
 const HashMap = require('hashmap')
+const config = require('./config')
 
 class BoardWatcher {
 	constructor(arr) {
@@ -14,7 +15,7 @@ class BoardWatcher {
 		})
 		
 		
-		setTimeout(()=> this.poll(), 10000)
+		setTimeout(()=> this.poll(), config.ratelimit.indexDelay)
 	}
 	
 	start() {
@@ -47,7 +48,7 @@ class BoardWatcher {
 				threadMap.remove(oldThread.no)
 			} else {
 				// Thread was deleted
-				let forced = oldThread.getPage() < 10;
+				let forced = oldThread.getPage() < config.misc.fallThreshold;
 				board.markDeleted(oldThread, forced)
 			}
 		})
