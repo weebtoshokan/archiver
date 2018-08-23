@@ -1,5 +1,5 @@
 const Board = require('./board')
-const BoardWatcher = require('./BoardWatcher')
+const BoardWatcher = require('./boardwatcher')
 const Database = require('./database')
 const config = require('./config')
 
