@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const util = require('util')
 
+
 let Local = {
     mkdir(dir) {
         //This code was designed by an egyptian but at least the rest is ok
@@ -58,6 +59,18 @@ let Local = {
         let path = util.format('%s/%s/%s', group1, group2, file)
         return path
     },
+
+    mvFile(oldFile, newFile) {
+        return new Promise((resolve, reject) => {
+            fs.rename(oldFile, newFile, (err) => {
+                if(err) {
+                    reject()
+                } else {
+                    resolve()
+                }
+            })
+        })
+    }
 
 }
 
