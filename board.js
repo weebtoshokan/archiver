@@ -139,7 +139,6 @@ class Board {
 				responseObject.posts = threadObject.posts.map((post) => new Post(post))
 			} else if(response.statusCode == 304 || response.statusCode == 404) {
 				thread.ping()
-				responseObject.noPosts = true
 			} else {
 				throw new Error("HTTP Request failed. Status code " + response.statusCode)
 			}
@@ -195,9 +194,7 @@ class Board {
 
 		this.requestThread(oldThread)
 		.then((newThread) => {
-			if(newThread.noPosts) {
-				console.log('[Debug] Thread had no posts!')
-				console.log(newThread.code)
+			if(!newThread.posts) {
 				return
 			}
 

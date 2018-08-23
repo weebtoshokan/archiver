@@ -38,7 +38,7 @@ class BoardWatcher {
 			let newThread = threadMap.get(oldThread.no)
 
 			if(newThread) {
-				if(newThread.getModified() !== oldThread.getModified()) {
+				if(newThread.getModified() !== oldThread.getModified() && oldThread.getLastReq() < newThread.getModified()) {
 					board.updateThread(oldThread)
 				}
 
