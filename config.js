@@ -1,7 +1,7 @@
 let config = {}
 
 config.database = {}
-config.proxy = {}
+config.address = {}
 config.ratelimit = {}
 config.path = {}
 config.misc = {}
@@ -12,8 +12,8 @@ config.database.username = 'test'
 config.database.password = 'test'
 config.database.name = 'test'
 
-config.proxy.rotate = false // Enable this to rotate through a list of ip addresses for requests
-config.proxy.list = 'proxy.txt' // Proxy list
+config.address.rotate = false // Enable this to rotate through a list of ip addresses for requests
+config.address.list = []
 
 config.ratelimit.concurrentImageRequests = 50 // Number of image requests that can be running at once
 config.ratelimit.concurrentThreadRequests = 20 // Number of thread requests that can be runnign at once
