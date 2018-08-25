@@ -178,6 +178,14 @@ class Database {
         str = str.replace(/<a[^>]*>(.*?)<\/a>/g, "$1")
         str = str.replace(/<s>/g, "[spoiler]")
         str = str.replace(/<\/s>/g, "[/spoiler]")
+        str = str.replace(/<span class=\"(?:[^\"]*)?deadlink\">(.*?)<\/span>/g, "$1")
+
+        str = str.replace(/<wbr>/g, "")
+        str = str.replace(/<(?:b|strong)>([\s\S]*?)<\/(?:b|strong)>/g, "[b]$1[/b]")
+        str = str.replace(/<br\s*\/?>/g, "\n")
+
+        str = str.replace(/<span .*?>(.*?)<\/span>/g, "") // Catch all for weird styling
+
         return this.cleanInput(str)
     }
 
