@@ -1,4 +1,4 @@
-CREATE TABLE IF NOT EXISTS %%BOARD%% (
+CREATE TABLE IF NOT EXISTS `%%BOARD%%` (
   doc_id int unsigned NOT NULL auto_increment,
   media_id int unsigned NOT NULL DEFAULT '0',
   poster_ip decimal(39,0) unsigned NOT NULL DEFAULT '0',
@@ -47,9 +47,9 @@ CREATE TABLE IF NOT EXISTS %%BOARD%% (
   INDEX timestamp_index (timestamp)
 ) engine=InnoDB CHARSET=%%CHARSET%%;
 
-CREATE TABLE IF NOT EXISTS %%BOARD%%_deleted LIKE %%BOARD%%;
+CREATE TABLE IF NOT EXISTS `%%BOARD%%_deleted` LIKE `%%BOARD%%`;
 
-CREATE TABLE IF NOT EXISTS %%BOARD%%_threads (
+CREATE TABLE IF NOT EXISTS `%%BOARD%%_threads` (
   thread_num int unsigned NOT NULL,
   time_op int unsigned NOT NULL,
   time_last int unsigned NOT NULL,
@@ -71,7 +71,7 @@ CREATE TABLE IF NOT EXISTS %%BOARD%%_threads (
   INDEX locked_index (locked)
 ) ENGINE=InnoDB CHARSET=%%CHARSET%%;
 
-CREATE TABLE IF NOT EXISTS %%BOARD%%_users (
+CREATE TABLE IF NOT EXISTS `%%BOARD%%_users` (
   user_id int unsigned NOT NULL auto_increment,
   name varchar(100) NOT NULL DEFAULT '',
   trip varchar(25) NOT NULL DEFAULT '',
@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS %%BOARD%%_users (
   INDEX postcount_index (postcount)
 ) ENGINE=InnoDB DEFAULT CHARSET=%%CHARSET%%;
 
-CREATE TABLE IF NOT EXISTS %%BOARD%%_images (
+CREATE TABLE IF NOT EXISTS `%%BOARD%%_images` (
   media_id int unsigned NOT NULL auto_increment,
   media_hash varchar(25) NOT NULL,
   media varchar(20),
@@ -99,7 +99,7 @@ CREATE TABLE IF NOT EXISTS %%BOARD%%_images (
   INDEX banned_index (banned)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
-CREATE TABLE IF NOT EXISTS %%BOARD%%_daily (
+CREATE TABLE IF NOT EXISTS `%%BOARD%%_daily` (
   `day` int(10) unsigned NOT NULL,
   `posts` int(10) unsigned NOT NULL,
   `images` int(10) unsigned NOT NULL,
