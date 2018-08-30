@@ -23,7 +23,7 @@ class BoardWatcher {
 	}
 
 	processThreads(board, threadListObject) {
-		if(threadListObject.noUpdate)
+		if(!threadListObject || threadListObject.noUpdate)
 			return
 
 		let oldThreads = board.getThreads()
