@@ -97,6 +97,8 @@ class Board {
 				threadListObject.list = JSON.parse(response.body)
 			} else if(response.statusCode == 304) {
 				threadListObject.noUpdate = true
+			} else if(response.statusCode == 404) {
+				console.log(util.format("Warning: Board %s returned 404. Board may not exist!", this.name))
 			} else {
 				throw new Error("HTTP Request failed. Status code " + response.statusCode)
 			}
