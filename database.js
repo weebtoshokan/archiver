@@ -172,6 +172,8 @@ class Database {
         if(!str)
             return null
 
+        str = str.replace(/<table class="exif"[^>]*>.*?<\/table>/g, "")
+        str = str.replace(/<span class="abbr">.*?<\/span>/g, "")
         str = str.replace(/<br>/g, "\n")
         str = str.replace(/<a[^>]*>(.*?)<\/a>/g, "$1")
         str = str.replace(/<span class=\"quote\">(.*?)<\/span>/g, "$1")
@@ -182,6 +184,7 @@ class Database {
 
         str = str.replace(/<wbr>/g, "")
         str = str.replace(/<(?:b|strong)>([\s\S]*?)<\/(?:b|strong)>/g, "[b]$1[/b]")
+        str = str.replace(/<pre[^>]*>(.*?)<\/pre>/g, "[code]$1[/code]")
         str = str.replace(/<br\s*\/?>/g, "\n")
 
         str = str.replace(/<span .*?>(.*?)<\/span>/g, "") // Catch all for weird styling
