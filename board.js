@@ -171,7 +171,7 @@ class Board {
 
 	insertThread(thread) {
 		if(!this.threads.has(thread.no))
-			throw new Error(util.format("Thread %s in board %s inserted but not setup.". thread.no, this.name))
+			throw new Error(util.format("Thread %s in board %s inserted but not setup.", thread.no, this.name))
 
 		this.database.insertThread(this.name, thread)
 	}
